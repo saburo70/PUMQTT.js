@@ -15,7 +15,7 @@ docker run -d --name rabbitmq -p 5672:5672 -p 5673:5673 -p 15672:15672 -p 1883:1
 for it to work with websocket mqtt you must enable <b>mqtt</b> and <b>web_mqtt</b> plugins :
 
 <code>
-rabbitmq-plugins enable rabbitmq_mqtt
+rabbitmq-plugins enable rabbitmq_mqtt<br>
 rabbitmq-plugins enable rabbitmq_web_mqtt
 </code>
 
