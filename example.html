@@ -1,0 +1,34 @@
+<html>
+    <head>
+        <script src="./lib/paho-mqtt-min.js"></script>
+        <script src="./src/PUMQTT.js"></script>
+    </head>
+    <body>
+        Check the console...
+        <script>
+            //configure here
+            const host = "localhost",
+                  user = "guest",
+                  password = "guest",
+                  port = 15675;
+
+           console.log("init");
+           var pumqtt = new PUMQTT(host,port);
+           pumqtt.connect(user,password)
+           .then(()=> {
+                console.log("mqtt successfully connected");
+                pumqtt
+                    .subscribe("test",(msg) => console.log(" --- "+msg))
+                    .subscribe("test2",(msg) => console.log(" +++ "+msg))
+                    .setTopicHandler("*",(msg,opts) => {
+                        console.log(opts.topic, ":"+msg);
+                        $("#received").append(opts.topic+":"+msg+"<br>");
+                    })
+                    .publish("test","Hello test topic!")  
+                    .publish("test2","Hello secondTest topic!");                
+            })
+           .catch(err => console.warn(err));
+        </script>
+
+    </body>
+</html>

@@ -79,6 +79,7 @@ class PUMQTT {
             this.client.disconnectedBufferSize;
         if (size === false) this.client.disconnectedPublishing = false;
         else this.client.disconnectedPublishing = true;
+        return this;
     }
 
     setTopicHandler(topic, handler) {
@@ -121,7 +122,11 @@ class PUMQTT {
     //sends out a message, msg is a raw packed (string or ArrayBuffer)
     publish(topic, msg, qos, retained ) {
         if (!this.client.isConnected() && !this.client.disconnectedPublishing) return this;
-        this.client.send(topic, msg, qos || 0 , retained || false);
+        try {
+            this.client.send(topic, msg, qos || 0 , retained || false);
+        } catch (err) {
+            console.warn("something went wrong sending out a message : ",err);
+        }
         return this;
     }
 
@@ -140,6 +145,7 @@ class PUMQTT {
     }
     
     //attempts a reconnection every second
+    //was used before the functionality wass implemented in Paho
     _reconnect() {
         if (this.attemptConnect && !this.client.isConnected()) {
             console.log("attem");
@@ -159,4 +165,5 @@ class PUMQTT {
             ,1000);
         }
     }
+
 }
