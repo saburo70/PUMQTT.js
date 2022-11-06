@@ -80,7 +80,7 @@ class PUMQTT {
         if (size === false) this.client.disconnectedPublishing = false;
         else this.client.disconnectedPublishing = true;
         return this;
-    }
+    } 
 
     setTopicHandler(topic, handler) {
          this.topicHandlers[topic] = handler;
@@ -92,13 +92,28 @@ class PUMQTT {
     listTopicHandlers = () => Object.keys(this.topicHandlers);
 
     //subscribes to a topic and installsan eventual handler
-    subscribe(topic, handler) {
+    subscribe(topic, handler, qos) {
         //https://www.eclipse.org/paho/files/jsdoc/Paho.MQTT.Message.html
         if (!this.client.isConnected()) return this;
         this.subscriptions.push(topic); //TODO: push object with options
-        if (handler) this.setTopicHandler(topic, handler); 
-        this.client.subscribe(topic, {qos: 1});
-        return this;    
+        if (handler) this.setTopicHandler(topic, handler);
+        qos = qos || 1; 
+        return this.client.subscribe(topic, {qos});
+
+    }
+ 
+    promiseSubscribe(topic, handler, qos) {
+        return new Promise((resolve, reject) => {
+            if (!this.client.isConnected()) return reject();
+            this.subscriptions.push(topic); //TODO: push object with options
+            if (handler) this.setTopicHandler(topic, handler);
+            qos = qos || 1; 
+            this.client.subscribe(topic, {
+                qos, 
+                onSuccess : resolve,
+                onFailure : reject
+            });
+        });   
     }
 
     reSubscribe() {        
