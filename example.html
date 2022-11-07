@@ -23,7 +23,7 @@
                     .setTopicHandler("*",(msg,opts) => {
                         console.log(opts.topic, ":"+msg);
                         $("#received").append(opts.topic+":"+msg+"<br>");
-                    }) // note : publishing immediately after subscribe might not allow the clien to catch the message back!
+                    }) // note : publishing immediately after subscribe might not allow the client to catch the message back!
                        // in a real case like this one, please use the promiseSubscribe method, which return a promise
                     .publish("test","Hello test topic!")  
                     .publish("test2","Hello secondTest topic!");                

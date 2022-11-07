@@ -94,6 +94,7 @@ class PUMQTT {
     //subscribes to a topic and installsan eventual handler
     subscribe(topic, handler, qos) {
         //https://www.eclipse.org/paho/files/jsdoc/Paho.MQTT.Message.html
+        //https://www.eclipse.org/paho/files/jsdoc/Paho.MQTT.Client.html
         if (!this.client.isConnected()) return this;
         this.subscriptions.push(topic); //TODO: push object with options
         if (handler) this.setTopicHandler(topic, handler);
@@ -129,7 +130,20 @@ class PUMQTT {
         return this;
     }
 
-    //removes all subscriptions
+    //returns a promise and overwrites onSuccess and onFailure in the options , if present
+    promiseUnsubscribe(topic, options) {
+        var ob = this;
+        return new Promise((resolve, reject) => {
+            if (!ob.client.isConnected()) return reject();
+            options = options || {};
+            options.onSuccess = resolve;
+            options.onFailure = reject;
+            ob.removeTopicHandler(topic);
+            ob.client.unsubscribe(topic, options);                        
+        });   
+    }
+
+   //removes all subscriptions
     unsubscribeAll(options) {
         this.subscriptions.forEach( topic => this.unsubscribe(topic, this.options));
     }
