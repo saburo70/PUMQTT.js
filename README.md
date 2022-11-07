@@ -17,8 +17,11 @@ should you prefer to install it on a VM (i.e. debian / ubuntu) , here some poitn
 
 <code>
   apt-get install erlang<br>  
+  
   apt-get install rabbitmq-server<br>  
+  
   systemctl enable rabbitmq-server<br>  
+  
   systemctl start rabbitmq-server<br>
 </code>
 
