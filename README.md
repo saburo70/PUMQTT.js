@@ -13,13 +13,27 @@ To test it I used rabbitMQ, the easiest way to set up a test local instance is t
 docker run -d --name rabbitmq -p 5672:5672 -p 5673:5673 -p 15672:15672 -p 1883:1883 -p 15675:15675 rabbitmq:3.8-management
 </code>
 
+shoudl you prefer to install it on a VM (i.e. debian / ubuntu) , here some poitners : 
+
+<code>
+  apt-get install erlang
+  
+  apt-get install rabbitmq-server
+  
+  systemctl enable rabbitmq-server
+  
+  systemctl start rabbitmq-server
+  <code>
+
 for it to work with websocket mqtt you must enable <b>mqtt</b> and <b>web_mqtt</b> plugins :
 
 <code>
 rabbitmq-plugins enable rabbitmq_mqtt
 
 rabbitmq-plugins enable rabbitmq_web_mqtt
-</code>
+</code> 
 
+(if you inetalled yoursef, you may also want to enable the management and prometheus plugins) 
+    
 tcp mqtt runs by default on port 1883, while websocket mqtt runs from port 15675
 You can use the guest user only from localhost, so if you are hosting your rabbitmq on a different address, you may need to create a second user and give it permissions
