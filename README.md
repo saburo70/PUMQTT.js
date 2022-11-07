@@ -16,13 +16,10 @@ docker run -d --name rabbitmq -p 5672:5672 -p 5673:5673 -p 15672:15672 -p 1883:1
 should you prefer to install it on a VM (i.e. debian / ubuntu) , here some poitners : 
 
 <code>
-  apt-get install erlang
-  
-  apt-get install rabbitmq-server
-  
-  systemctl enable rabbitmq-server
-  
-  systemctl start rabbitmq-server
+  apt-get install erlang<br>  
+  apt-get install rabbitmq-server<br>  
+  systemctl enable rabbitmq-server<br>  
+  systemctl start rabbitmq-server<br>
 </code>
 
 for it to work with websocket mqtt you must enable <b>mqtt</b> and <b>web_mqtt</b> plugins :
