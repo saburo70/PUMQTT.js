@@ -13,7 +13,7 @@ To test it I used rabbitMQ, the easiest way to set up a test local instance is t
 docker run -d --name rabbitmq -p 5672:5672 -p 5673:5673 -p 15672:15672 -p 1883:1883 -p 15675:15675 rabbitmq:3.8-management
 </code>
 
-shoudl you prefer to install it on a VM (i.e. debian / ubuntu) , here some poitners : 
+should you prefer to install it on a VM (i.e. debian / ubuntu) , here some poitners : 
 
 <code>
   apt-get install erlang
@@ -23,7 +23,7 @@ shoudl you prefer to install it on a VM (i.e. debian / ubuntu) , here some poitn
   systemctl enable rabbitmq-server
   
   systemctl start rabbitmq-server
-  <code>
+</code>
 
 for it to work with websocket mqtt you must enable <b>mqtt</b> and <b>web_mqtt</b> plugins :
 
