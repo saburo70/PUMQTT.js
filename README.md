@@ -1,10 +1,10 @@
 # PUMQTT.js
-a wrapper class for Paho, to ease using MQTT in the browser
+a wrapper class for Paho, to ease using MQTT in the browser. Currently Paho js supports MQTT v3.1.1
 
 
 Paho is already quite easy to use,  but I created this wrapper class for myself (cecause I am lazy :) ) to make things a bit more convenient for me.
 Feel free to use it and to contribute.
-The wrapper is Promise based.
+The wrapper is Promise based and adds a bit of functionality to manage subscription handlers.
 
 The Eclipse Paho repositoy can be found here : https://github.com/eclipse/paho.mqtt.javascript
 
