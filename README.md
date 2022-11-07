@@ -17,16 +17,16 @@ should you prefer to install it on a VM (i.e. debian / ubuntu) , here some point
 
 <code>
   apt-get install erlang
- </code>
+ </code><br>
  <code>
   apt-get install rabbitmq-server<br>  
-  </code>
+  </code><br>
   <code>
   systemctl enable rabbitmq-server<br>  
-  </code>
+  </code><br>
   <code>
   systemctl start rabbitmq-server<br>
-</code>
+</code><br>
 
 for it to work with websocket mqtt you must enable <b>mqtt</b> and <b>web_mqtt</b> plugins :
 
