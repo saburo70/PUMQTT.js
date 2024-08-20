@@ -7,26 +7,25 @@
         Check the console...
         <script>
             //configure here
-            const host = "localhost",
-                  user = "guest",
-                  password = "guest",
-                  port = 15675;
+            const host = "broker.hivemq.com",
+                  user = null, //"guest",
+                  password = null, //"guest",
+                  port = 8884;
 
            console.log("init");
-           var pumqtt = new PUMQTT(host,port);
+           var pumqtt = new PUMQTT(host,port,'/mqtt');
            pumqtt.connect(user,password)
            .then(()=> {
                 console.log("mqtt successfully connected");
-                pumqtt
-                    .subscribe("test",(msg) => console.log(" --- "+msg)) 
-                    .subscribe("test2",(msg) => console.log(" +++ "+msg))
-                    .setTopicHandler("*",(msg,opts) => {
+                pumqtt.subscribe("test1234",(msg) => console.log(" --- "+msg)) 
+                pumqtt.subscribe("test21234",(msg) => console.log(" +++ "+msg))
+                pumqtt.setTopicHandler("*",(msg,opts) => {
                         console.log(opts.topic, ":"+msg);
                         $("#received").append(opts.topic+":"+msg+"<br>");
                     }) // note : publishing immediately after subscribe might not allow the client to catch the message back!
                        // in a real case like this one, please use the promiseSubscribe method, which return a promise
-                    .publish("test","Hello test topic!")  
-                    .publish("test2","Hello secondTest topic!");                
+                    pumqtt.publish("test1234","Hello test topic!")  
+                    pumqtt.publish("test21234","Hello secondTest topic!");                
             })
            .catch(err => console.warn(err));
         </script>
