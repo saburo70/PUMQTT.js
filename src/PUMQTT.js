@@ -63,6 +63,7 @@ class PUMQTT {
             };
        
         });
+        return this;
     }
 
     //disconnects from server
