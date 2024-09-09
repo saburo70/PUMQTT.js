@@ -5,6 +5,8 @@
 */
 //https://www.eclipse.org/paho/index.php?page=clients/python/docs/index.php
 //https://www.eclipse.org/paho/files/jsdoc/Paho.MQTT.Client.html
+/* global Paho */
+
 class PUMQTT {
     options =  {
         timeout: 3,
@@ -12,19 +14,17 @@ class PUMQTT {
         reconnect : true
     };
     
+    identifier = null;
+    identifierBytes = 0;
+
     topicHandlers = {};
 
     subscriptions = [];
     
     //helper method to generate uuids
     static puUuid = (init) => {
-        if (init) return init.substring(0, 1) + 'xxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0,
-                v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-        else
-         return 'xxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        init = (init || '').substring(0,4);
+        return init + 'xxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             var r = Math.random() * 16 | 0,
                 v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
@@ -39,12 +39,39 @@ class PUMQTT {
         this.client = new   Paho.MQTT.Client(host, Number(port||15675), path || "/ws", this.clientID);
     }
 
+    setIdentifier(ident) {
+        if (ident == null) ident = '';
+        this.identifier = ident;
+        this.identifierBytes = ident.length;
+        return this;
+    }
+
+     muteSender(ident) {
+         if (!this.mutedSenders) this.mutedSenders=[];
+         if (this.mutedSenders.indexOf(ident)==-1) this.mutedSenders.push(ident);
+         return this;
+     }
+     
+     unMuteSender(ident) {
+         if (!this.mutedSenders) return this;
+         var idx = this.mutedSenders.indexOf(ident);
+         if (idx!=-1) this.mutedSenders.splice(idx,1);
+         if (this.mutedSenders.length==0) delete this.mutedSenders;
+         return this;
+     }
+     
+     filterMeOut() {
+         if (this.identifier) this.muteSender(this.identifier);
+         return this;
+     }
+
     // connect to server, returns a promise
     connect(uname, upasswd) {
         if (uname && upasswd) {
             this.options.userName = uname;
             this.options.password = upasswd;
         }
+        this.options.useSSL = true;
         this.attemptConnect = true;
         return new Promise((resolve, reject) => {
             this.options.onSuccess = () => {
@@ -57,9 +84,16 @@ class PUMQTT {
             this.client.connect(this.options);
             this.client.onMessageArrived = (message) => {     
                 var topic = message.destinationName,
-                    pars = {duplicate : message.duplicate, qos : message.qos,topic , retained : message.retained , raw : message.payloadBytes };
-                if (Object.prototype.hasOwnProperty.call(this.topicHandlers,topic)) this.topicHandlers[topic](message.payloadString, pars );
-                if (Object.prototype.hasOwnProperty.call(this.topicHandlers,"*")) this.topicHandlers["*"](message.payloadString, pars );            
+                    pars = {duplicate : message.duplicate, qos : message.qos,topic , retained : message.retained , raw : message.payloadBytes },
+                    msgTxt = message.payloadString;
+                if (this.identifierBytes>0) {
+                    pars.sender = message.payloadString.substring(0,4);
+                    if (pars.sender == this.identifier) pars.self = true;
+                    if (this.mutedSenders && (this.mutedSendes.indexOf(pars.sender)>=0)) return; // muted
+                    msgTxt = message.payloadString.substring(4);
+                }    else msgTxt = message.payloadString;
+                if (Object.prototype.hasOwnProperty.call(this.topicHandlers,topic)) this.topicHandlers[topic](msgTxt, pars );
+                    if (Object.prototype.hasOwnProperty.call(this.topicHandlers,"*")) this.topicHandlers["*"](msgTxt, pars );
             };
        
         });
@@ -92,7 +126,12 @@ class PUMQTT {
 
     listTopicHandlers = () => Object.keys(this.topicHandlers);
 
-    //subscribes to a topic and installsan eventual handler
+    clearRetained(topic) {
+        this.publish(topic,"",0,true);
+    }
+
+
+    //subscribes to a topic and installs an eventual handler
     subscribe(topic, handler, qos) {
         //https://www.eclipse.org/paho/files/jsdoc/Paho.MQTT.Message.html
         //https://www.eclipse.org/paho/files/jsdoc/Paho.MQTT.Client.html
@@ -100,13 +139,13 @@ class PUMQTT {
         this.subscriptions.push(topic); //TODO: push object with options
         if (handler) this.setTopicHandler(topic, handler);
         qos = qos || 1; 
-        return this.client.subscribe(topic, {qos});
-
+        this.client.subscribe(topic, {qos});
+        return this;
     }
  
     promiseSubscribe(topic, handler, qos) {
         return new Promise((resolve, reject) => {
-            if (!this.client.isConnected()) return reject();
+            if (!this.client.isConnected()) return reject("not connected");
             this.subscriptions.push(topic); //TODO: push object with options
             if (handler) this.setTopicHandler(topic, handler);
             qos = qos || 1; 
@@ -153,7 +192,14 @@ class PUMQTT {
     publish(topic, msg, qos, retained ) {
         if (!this.client.isConnected() && !this.client.disconnectedPublishing) return this;
         try {
-            this.client.send(topic, msg, qos || 0 , retained || false);
+            if (this.identifierBytes>0) msg = this.identifier + msg;
+            var message = new Paho.MQTT.Message(msg);
+            message.destinationName = topic;
+            message.qos = qos || 2;
+             message.retained = retained || false;
+            this.client.send(message);
+            
+            //this.client.send(topic, msg, qos || 2 , retained || false);
         } catch (err) {
             console.warn("something went wrong sending out a message : ",err);
         }
